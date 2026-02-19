@@ -270,10 +270,10 @@ export const OnboardingPage: React.FC = () => {
                                 </div>
 
                                 <button
-                                    onClick={() => setStep(2)}
+                                    onClick={() => navigate('/home')}
                                     className="mt-8 text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline decoration-dotted"
                                 >
-                                    Skip and fill manually
+                                    Skip setup and go to Dashboard
                                 </button>
                             </div>
                         ) : inputMethod === 'resume' ? (

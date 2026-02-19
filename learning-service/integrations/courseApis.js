@@ -1,55 +1,43 @@
 const axios = require('axios');
+const ytSearch = require('yt-search');
 
 /**
- * YouTube Data API Integration
- * Free tier: 10,000 units/day (~100 searches)
+ * YouTube Data API Integration (Keyless)
+ * Uses scraping via yt-search to bypass API quotas
  */
 class YouTubeClient {
-    constructor(apiKey) {
-        this.apiKey = apiKey || process.env.YOUTUBE_API_KEY;
-        this.baseUrl = 'https://www.googleapis.com/youtube/v3';
+    constructor() {
+        this.platform = 'YouTube';
     }
 
-    async searchCourses(topic, maxResults = 20) {
-        if (!this.apiKey) {
-            console.warn('YouTube API key not configured');
-            return [];
-        }
-
+    async searchCourses(topic) {
         try {
-            const response = await axios.get(`${this.baseUrl}/search`, {
-                params: {
-                    part: 'snippet',
-                    q: `${topic} tutorial course`,
-                    type: 'video',
-                    videoDuration: 'long', // Only long videos (>20min)
-                    order: 'relevance',
-                    maxResults,
-                    key: this.apiKey
-                }
-            });
+            if (!topic) return [];
 
-            return response.data.items.map(item => this.formatCourse(item));
+            const results = await ytSearch(topic + ' tutorial course long');
+            const videos = results.videos.slice(0, 20);
+
+            return videos.map(video => this.formatCourse(video));
         } catch (error) {
-            console.error('YouTube API error:', error.message);
+            console.error('YouTube search error:', error.message);
             return [];
         }
     }
 
-    formatCourse(item) {
+    formatCourse(video) {
         return {
-            id: item.id.videoId,
-            title: item.snippet.title,
-            description: item.snippet.description,
-            thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.default.url,
-            url: `https://youtube.com/watch?v=${item.id.videoId}`,
-            instructor: item.snippet.channelTitle,
+            id: video.videoId,
+            title: video.title,
+            description: video.description || 'Watch on YouTube',
+            thumbnail: video.thumbnail,
+            url: video.url,
+            instructor: video.author?.name || 'YouTube',
             platform: 'YouTube',
             level: 'All Levels',
-            duration: 'Video',
-            rating: null,
+            duration: video.timestamp,
+            rating: null, // No rating available via search
             price: 'Free',
-            published: new Date(item.snippet.publishedAt),
+            published: video.ago, // Relative time string
             source: 'YouTube'
         };
     }

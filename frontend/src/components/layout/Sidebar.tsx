@@ -15,12 +15,14 @@ import {
     Zap,
     BarChart3,
     LayoutDashboard,
+    ChevronUp,
+    ChevronDown,
 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import clsx from 'clsx';
 
 const navItems = [
     { icon: Home, label: 'Home', path: '/home' },
-    { icon: User, label: 'Profile', path: '/profile' },
     { icon: MessageSquare, label: 'AI Chat', path: '/chat' },
     { icon: FileText, label: 'Resume Builder', path: '/resume-builder' },
     { icon: Briefcase, label: 'Jobs', path: '/jobs' },
@@ -40,8 +42,23 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export const Sidebar: React.FC = () => {
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <aside className="hidden md:flex flex-col w-72 bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border">
@@ -108,31 +125,56 @@ export const Sidebar: React.FC = () => {
                 ))}
             </nav>
 
-            <div className="p-4 m-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
-                <div className="flex items-center gap-3 mb-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <p className="text-xs font-medium text-gray-500">System Status: Online</p>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-2">
-                    <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '12%' }}></div>
-                </div>
-                <p className="text-[10px] text-gray-400">CPU Usage: 12%</p>
-            </div>
+            <div className="p-4 border-t border-gray-100 dark:border-dark-border relative" ref={menuRef}>
+                {isMenuOpen && (
+                    <div className="absolute bottom-full left-4 right-4 mb-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden animate-fadeIn">
+                        <button
+                            onClick={() => {
+                                setIsMenuOpen(false);
+                                navigate('/settings');
+                            }}
+                            className="flex items-center gap-3 px-4 py-3 w-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border/50 transition-colors text-sm"
+                        >
+                            <Settings size={18} />
+                            <span>Settings</span>
+                        </button>
+                        <button
+                            onClick={() => {
+                                setIsMenuOpen(false);
+                                navigate('/profile');
+                            }}
+                            className="flex items-center gap-3 px-4 py-3 w-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border/50 transition-colors text-sm"
+                        >
+                            <User size={18} />
+                            <span>Profile</span>
+                        </button>
+                        <div className="h-px bg-gray-100 dark:bg-gray-700 my-1" />
+                        <button
+                            onClick={logout}
+                            className="flex items-center gap-3 px-4 py-3 w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm"
+                        >
+                            <LogOut size={18} />
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                )}
 
-            <div className="p-4 border-t border-gray-100 dark:border-dark-border space-y-1">
                 <button
-                    onClick={() => navigate('/settings')}
-                    className="flex items-center gap-3 px-4 py-3 w-full text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-dark-border/50 rounded-xl transition-colors"
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="flex items-center justify-between w-full p-2 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-border/50 transition-colors"
                 >
-                    <Settings size={20} />
-                    <span>Settings</span>
-                </button>
-                <button
-                    onClick={logout}
-                    className="flex items-center gap-3 px-4 py-3 w-full text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
-                >
-                    <LogOut size={20} />
-                    <span>Logout</span>
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold border border-blue-200 dark:border-blue-800">
+                            {user?.full_name ? user.full_name.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div className="text-left">
+                            <p className="text-sm font-medium truncate max-w-[120px]">
+                                {user?.full_name || 'User'}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Settings</p>
+                        </div>
+                    </div>
+                    {isMenuOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
                 </button>
             </div>
         </aside>

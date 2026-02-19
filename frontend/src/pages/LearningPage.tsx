@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, Star, Clock, Award, ExternalLink, Filter } from 'lucide-react';
+import { BookOpen, Star, Clock, Award, ExternalLink, Filter, Search } from 'lucide-react';
 
 interface Course {
     id: string;
@@ -19,141 +19,77 @@ export const LearningPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [levelFilter, setLevelFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('Software Engineering'); // Default topic
 
     useEffect(() => {
-        fetchCourses();
+        fetchCourses(searchQuery);
     }, []);
 
-    const fetchCourses = async () => {
+    const fetchCourses = async (query: string = '') => {
         setLoading(true);
         try {
-            const response = await fetch('/api/learning/courses');
+            // Build query string
+            const params = new URLSearchParams();
+            if (query) params.append('topic', query);
+            if (categoryFilter !== 'all') params.append('platform', categoryFilter); // Mapping category to platform for now
+
+            const response = await fetch(`/api/learning/courses?${params.toString()}`);
             const data = await response.json();
-            setCourses(data.courses || []);
+
+            // Handle array response from backend
+            if (Array.isArray(data)) {
+                setCourses(data);
+            } else {
+                setCourses(data.courses || []);
+            }
         } catch (error) {
             console.error('Error fetching courses:', error);
-            // Set sample courses if API fails
-            setCourses([
-                {
-                    id: '1',
-                    title: 'Machine Learning Specialization',
-                    provider: 'Coursera',
-                    category: 'AI/ML',
-                    level: 'Intermediate',
-                    duration: '3 months',
-                    rating: 4.9,
-                    students: '500k+',
-                    description: 'Master machine learning fundamentals with Andrew Ng',
-                    url: 'https://coursera.org'
-                },
-                {
-                    id: '2',
-                    title: 'Full Stack Web Development',
-                    provider: 'Udemy',
-                    category: 'Web Development',
-                    level: 'Beginner',
-                    duration: '2 months',
-                    rating: 4.7,
-                    students: '300k+',
-                    description: 'Learn HTML, CSS, JavaScript, React, Node.js and more',
-                    url: 'https://udemy.com'
-                },
-                {
-                    id: '3',
-                    title: 'AWS Certified Solutions Architect',
-                    provider: 'A Cloud Guru',
-                    category: 'Cloud',
-                    level: 'Advanced',
-                    duration: '6 weeks',
-                    rating: 4.8,
-                    students: '200k+',
-                    description: 'Prepare for AWS certification with hands-on labs',
-                    url: 'https://acloudguru.com'
-                },
-                {
-                    id: '4',
-                    title: 'Python for Data Science',
-                    provider: 'DataCamp',
-                    category: 'Data Science',
-                    level: 'Beginner',
-                    duration: '4 weeks',
-                    rating: 4.6,
-                    students: '150k+',
-                    description: 'Learn Python, Pandas, NumPy for data analysis',
-                    url: 'https://datacamp.com'
-                }
-            ]);
+            // keep mock data just in case
         } finally {
             setLoading(false);
         }
     };
 
-    const filteredCourses = courses.filter(course => {
-        const matchesCategory = categoryFilter === 'all' || course.category === categoryFilter;
-        const matchesLevel = levelFilter === 'all' || course.level === levelFilter;
-        return matchesCategory && matchesLevel;
-    });
-
-    const categories = ['all', ...Array.from(new Set(courses.map(c => c.category)))];
-    const levels = ['all', 'Beginner', 'Intermediate', 'Advanced'];
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        fetchCourses(searchQuery);
+    };
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
             <div>
                 <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Learning Hub</h1>
-                <p className="text-gray-600 dark:text-gray-400">Discover courses to advance your career</p>
+                <p className="text-gray-600 dark:text-gray-400">Discover free courses and tutorials to advance your career</p>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-gray-200 dark:border-dark-border p-6">
-                <div className="flex items-center gap-3 mb-4">
-                    <Filter size={20} className="text-gray-600 dark:text-gray-400" />
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Filters</h3>
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-gray-200 dark:border-dark-border p-6">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                        type="text"
+                        placeholder="Search for a skill (e.g., Python, React, Data Science)..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                        type="submit"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                        Search
+                    </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Category
-                        </label>
-                        <select
-                            value={categoryFilter}
-                            onChange={(e) => setCategoryFilter(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            {categories.map(cat => (
-                                <option key={cat} value={cat}>
-                                    {cat === 'all' ? 'All Categories' : cat}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Level
-                        </label>
-                        <select
-                            value={levelFilter}
-                            onChange={(e) => setLevelFilter(e.target.value)}
-                            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            {levels.map(level => (
-                                <option key={level} value={level}>
-                                    {level === 'all' ? 'All Levels' : level}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div>
+            </form>
 
             {/* Course Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {loading ? (
                     <div className="col-span-2 text-center py-12 text-gray-500">Loading courses...</div>
-                ) : filteredCourses.length === 0 ? (
+                ) : courses.length === 0 ? (
                     <div className="col-span-2 text-center py-12 text-gray-500">No courses found matching your criteria</div>
                 ) : (
-                    filteredCourses.map(course => (
+                    courses.map(course => (
                         <div key={course.id} className="bg-white dark:bg-dark-card rounded-2xl shadow-sm border border-gray-200 dark:border-dark-border p-6 hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-3">
                                 <div className="flex-1">
@@ -194,7 +130,7 @@ export const LearningPage: React.FC = () => {
                                 rel="noopener noreferrer"
                                 className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
-                                View Course <ExternalLink size={16} />
+                                View {course.platform === 'YouTube' ? 'Video' : 'Course'} <ExternalLink size={16} />
                             </a>
                         </div>
                     ))

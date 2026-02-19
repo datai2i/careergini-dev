@@ -33,9 +33,20 @@ app.use('/api/ai', proxy(AI_SERVICE_URL, {
 }));
 
 app.use('/api/profile', proxy(PROFILE_SERVICE_URL));
-app.use('/api/jobs', proxy(JOB_SERVICE_URL));
+
+app.use('/api/jobs', proxy(JOB_SERVICE_URL, {
+    proxyReqPathResolver: function (req) {
+        return req.originalUrl.replace('/api', '');
+    }
+}));
+
 app.use('/api/learning', proxy(LEARNING_SERVICE_URL));
-app.use('/api/applications', proxy(APPLICATION_SERVICE_URL));
+
+app.use('/api/applications', proxy(APPLICATION_SERVICE_URL, {
+    proxyReqPathResolver: function (req) {
+        return req.originalUrl.replace('/api', '');
+    }
+}));
 
 // Resume routes (handled by AI Service)
 app.use('/api/resume', proxy(AI_SERVICE_URL, {

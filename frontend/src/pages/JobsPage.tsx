@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
 import { Search, MapPin, Briefcase, DollarSign, Clock, ExternalLink, Filter } from 'lucide-react';
 
 interface Job {
@@ -27,7 +31,12 @@ export const JobsPage: React.FC = () => {
         try {
             const response = await fetch('/api/jobs');
             const data = await response.json();
-            setJobs(data.jobs || []);
+            // Handle array response from backend
+            if (Array.isArray(data)) {
+                setJobs(data);
+            } else {
+                setJobs(data.jobs || []);
+            }
         } catch (error) {
             console.error('Error fetching jobs:', error);
             // Set sample jobs if API fails
@@ -126,9 +135,15 @@ export const JobsPage: React.FC = () => {
                                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">{job.title}</h3>
                                     <p className="text-lg text-gray-700 dark:text-gray-300">{job.company}</p>
                                 </div>
-                                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                <a
+                                    href={// @ts-ignore
+                                        job.url || '#'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                                >
                                     Apply <ExternalLink size={16} />
-                                </button>
+                                </a>
                             </div>
 
                             <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600 dark:text-gray-400">
@@ -150,7 +165,18 @@ export const JobsPage: React.FC = () => {
                                 </div>
                             </div>
 
-                            <p className="text-gray-700 dark:text-gray-300">{job.description}</p>
+                            <div className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300">
+                                <ReactMarkdown
+                                    rehypePlugins={[rehypeRaw]}
+                                    remarkPlugins={[remarkGfm, remarkBreaks]}
+                                    components={{
+                                        // Override link opening behavior
+                                        a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline" />
+                                    }}
+                                >
+                                    {job.description}
+                                </ReactMarkdown>
+                            </div>
                         </div>
                     ))
                 )}
