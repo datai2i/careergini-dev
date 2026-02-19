@@ -1,0 +1,28 @@
+# Node.js
+node_modules/
+dist/
+coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+
+# Docker
+docker-data/
+
+# OS specific
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Local data
+uploads/
+*.log
+*.pdf
+*.docx
