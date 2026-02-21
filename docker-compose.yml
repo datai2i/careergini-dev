@@ -201,11 +201,75 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
+      - "81:81"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - frontend
       - api-gateway
+      - haystack-frontend
+      - haystack-api-gateway
+    restart: unless-stopped
+
+  # --- HAYSTACK EXPERIMENTAL SERVICES ---
+
+  haystack-frontend:
+    build:
+      context: ./haystack-frontend
+      dockerfile: ../docker/haystack-frontend.Dockerfile
+    ports:
+      - "5174:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3004
+    volumes:
+      - ./haystack-frontend:/app
+    depends_on:
+      - haystack-api-gateway
+    restart: unless-stopped
+
+  haystack-api-gateway:
+    build:
+      context: ./haystack-api-gateway
+      dockerfile: ../docker/haystack-api-gateway.Dockerfile
+    ports:
+      - "3004:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://careergini:changeme@postgres:5432/careergini
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET:-change-in-production}
+      - AI_SERVICE_URL=http://haystack-service:8000
+      - PROFILE_SERVICE_URL=http://profile-service:3001
+      - JOB_SERVICE_URL=http://job-service:3002
+      - LEARNING_SERVICE_URL=http://learning-service:3003
+    volumes:
+      - ./haystack-api-gateway:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  haystack-service:
+    build:
+      context: ./haystack-service
+      dockerfile: ../docker/haystack-service.Dockerfile
+    ports:
+      - "8002:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_NUM_THREADS=6
+      - DATABASE_URL=postgresql://careergini:changeme@postgres:5432/careergini
+      - REDIS_URL=redis://redis:6379
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+    volumes:
+      - ./haystack-service:/app
+    depends_on:
+      - ollama
+      - postgres
+      - redis
+      - chromadb
     restart: unless-stopped
 
 volumes:

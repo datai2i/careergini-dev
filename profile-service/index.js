@@ -28,36 +28,51 @@ app.get('/health', (req, res) => {
 
 // --- Auth Routes ---
 
+const getFrontendUrl = (state) => {
+    if (state === 'haystack') {
+        return process.env.HAYSTACK_FRONTEND_URL || 'http://51.89.225.112.nip.io:81';
+    }
+    return process.env.FRONTEND_URL || 'http://localhost:5173';
+};
+
 // Google
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google', (req, res, next) => {
+    const state = req.query.source === 'haystack' ? 'haystack' : 'langchain';
+    passport.authenticate('google', { scope: ['profile', 'email'], state })(req, res, next);
+});
 app.get('/auth/google/callback',
     passport.authenticate('google', { session: false, failureRedirect: '/login' }),
     (req, res) => {
         const token = generateToken(req.user);
-        // Redirect to frontend with token
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const frontendUrl = getFrontendUrl(req.query.state);
         res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
     }
 );
 
 // LinkedIn
-app.get('/auth/linkedin', passport.authenticate('linkedin', { state: 'SOME STATE' }));
+app.get('/auth/linkedin', (req, res, next) => {
+    const state = req.query.source === 'haystack' ? 'haystack' : 'langchain';
+    passport.authenticate('linkedin', { state })(req, res, next);
+});
 app.get('/auth/linkedin/callback',
     passport.authenticate('linkedin', { session: false, failureRedirect: '/login' }),
     (req, res) => {
         const token = generateToken(req.user);
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const frontendUrl = getFrontendUrl(req.query.state);
         res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
     }
 );
 
 // GitHub
-app.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+app.get('/auth/github', (req, res, next) => {
+    const state = req.query.source === 'haystack' ? 'haystack' : 'langchain';
+    passport.authenticate('github', { scope: ['user:email'], state })(req, res, next);
+});
 app.get('/auth/github/callback',
     passport.authenticate('github', { session: false, failureRedirect: '/login' }),
     (req, res) => {
         const token = generateToken(req.user);
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const frontendUrl = getFrontendUrl(req.query.state);
         res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
     }
 );

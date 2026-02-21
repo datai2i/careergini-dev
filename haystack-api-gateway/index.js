@@ -11,7 +11,7 @@ app.use(cors());
 app.use(morgan('dev'));
 
 // Service URLs
-const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://ai-service:8000';
+const AI_SERVICE_URL = process.env.AI_SERVICE_URL || 'http://haystack-service:8002';
 const PROFILE_SERVICE_URL = process.env.PROFILE_SERVICE_URL || 'http://careergini-profile:3001';
 const JOB_SERVICE_URL = process.env.JOB_SERVICE_URL || 'http://job-service:3002';
 const LEARNING_SERVICE_URL = process.env.LEARNING_SERVICE_URL || 'http://learning-service:3003';
@@ -24,7 +24,7 @@ app.get('/health', (req, res) => {
 
 // Proxy routes - file uploads need special handling
 app.use('/api/ai', proxy(AI_SERVICE_URL, {
-    timeout: 600000, // 10 minutes
+    timeout: 1800000, // 30 minutes
     parseReqBody: false, // Don't parse body for file uploads
     proxyReqOptDecorator: function (proxyReqOpts, srcReq) {
         // Preserve content-type for multipart/form-data
@@ -49,7 +49,7 @@ app.use('/api/applications', proxy(APPLICATION_SERVICE_URL, {
 }));
 
 // Resume routes (handled by AI Service)
-app.use('/api/resume', proxy('http://haystack-service:8002', {
+app.use('/api/resume', proxy(AI_SERVICE_URL, {
     timeout: 1800000, // 30 minutes
     parseReqBody: false, // Don't parse body for file uploads
     proxyReqPathResolver: function (req) {
@@ -71,6 +71,11 @@ app.use('/api/uploads', proxy(AI_SERVICE_URL, {
     }
 }));
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`API Gateway running on port ${PORT}`);
 });
+
+// Overwrite default Node.js 120s HTTP timeout mechanisms
+server.timeout = 1200000;
+server.keepAliveTimeout = 1200000;
+server.headersTimeout = 1200000;
