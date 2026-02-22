@@ -58,7 +58,7 @@ export const HomePage: React.FC = () => {
             title: 'Resume Builder',
             description: 'Create and optimize your professional resume',
             color: 'from-purple-500 to-purple-600',
-            path: '/resume'
+            path: '/resume-builder'
         },
         {
             icon: Briefcase,

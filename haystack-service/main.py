@@ -457,8 +457,8 @@ async def chat(request: ChatRequest):
     """
     logger.info(f"Processing chat for user {request.user_id}")
     
-    # Check cache first (using message as key)
-    cached_response = cache.get("chat", request.message)
+    # Check cache first (using user_id + message as key)
+    cached_response = cache.get("chat", f"{request.user_id}:{request.message}")
     if cached_response:
         # Parse cached response
         try:
@@ -494,8 +494,8 @@ async def chat(request: ChatRequest):
             "suggested_prompts": result.get("suggested_prompts", [])
         }
         
-        # Cache the response
-        cache.set("chat", request.message, json.dumps(response_data))
+        # Cache the response per user
+        cache.set("chat", f"{request.user_id}:{request.message}", json.dumps(response_data))
         
         return ChatResponse(**response_data)
         
@@ -510,8 +510,8 @@ async def chat_stream(request: ChatRequest):
     """
     logger.info(f"Processing streaming chat for user {request.user_id}")
     
-    # Check cache first
-    cached_response = cache.get("chat", request.message)
+    # Check cache first per user
+    cached_response = cache.get("chat", f"{request.user_id}:{request.message}")
     if cached_response:
         # Return cached response as a single SSE event
         async def send_cached():
@@ -576,9 +576,9 @@ async def chat_stream(request: ChatRequest):
                 "suggested_prompts": []
             }
             
-            # Cache the complete response
+            # Cache the complete response per user
             if response_text:
-                cache.set("chat", request.message, json.dumps(response_data))
+                cache.set("chat", f"{request.user_id}:{request.message}", json.dumps(response_data))
                 yield f"data: {json.dumps({'type': 'done', 'data': response_data})}\n\n"
             else:
                 yield f"data: {json.dumps({'type': 'error', 'error': 'No response generated'})}\n\n"
