@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, CheckCircle2, ChevronRight, Check, AlertCircle, Loader2, Link as LinkIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export const OnboardingPage: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [step, setStep] = useState(1);
     const [inputMethod, setInputMethod] = useState<'resume' | 'linkedin' | null>(null);
     const [linkedinUrl, setLinkedinUrl] = useState('');
@@ -30,68 +32,34 @@ export const OnboardingPage: React.FC = () => {
         setError(null);
 
         try {
-            // 1. Upload File & Extract Text
-            const uploadData = new FormData();
-            uploadData.append('file', file);
+            const formDataUpload = new FormData();
+            formDataUpload.append('file', file);
 
-            const uploadRes = await fetch('/api/ai/resume/upload', {
+            const uploadRes = await fetch(`/api/resume/upload?user_id=${user?.id || 'default'}`, {
                 method: 'POST',
-                body: uploadData,
+                body: formDataUpload,
             });
 
-            if (!uploadRes.ok) throw new Error('Failed to upload resume');
+            if (!uploadRes.ok) throw new Error('Failed to upload and parse resume');
 
             const uploadJson = await uploadRes.json();
-            console.log("DEBUG: Upload Response", uploadJson);
-            const { text } = uploadJson;
+            const persona = uploadJson.persona || {};
 
-            // 2. Parse Text with AI
-            const parseRes = await fetch('/api/ai/resume/parse', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text }),
-            });
+            setFormData(prev => ({
+                ...prev,
+                headline: persona.professional_title || persona.full_name || '',
+                location: persona.location || '',
+                summary: persona.summary || '',
+                skills: persona.top_skills || [],
+                experience: persona.experience_highlights || [],
+                education: persona.education || []
+            }));
 
-            if (!parseRes.ok) throw new Error('Failed to analyze resume');
-
-            const parseJson = await parseRes.json();
-            console.log("DEBUG: Parse Response", parseJson);
-            const { parsed_data } = parseJson;
-
-            // Handle Parse Failure / Fallback
-            if (parsed_data.note || !parsed_data.name) {
-                console.warn("Using fallback parsing data");
-                setError('AI extraction partial. Please verify fields manually.');
-                const rawSummary = parsed_data.raw_response || parsed_data.summary || '';
-
-                setFormData(prev => ({
-                    ...prev,
-                    headline: parsed_data.title || parsed_data.name || '',
-                    location: parsed_data.location || '',
-                    summary: typeof rawSummary === 'string' ? rawSummary.slice(0, 500) : '',
-                    skills: Array.isArray(parsed_data.skills) ? parsed_data.skills : [],
-                    experience: Array.isArray(parsed_data.experience) ? parsed_data.experience : [],
-                    education: Array.isArray(parsed_data.education) ? parsed_data.education : []
-                }));
-            } else {
-                // Success Case
-                setFormData(prev => ({
-                    ...prev,
-                    headline: parsed_data.title || parsed_data.name || '',
-                    location: parsed_data.location || '',
-                    summary: parsed_data.summary || '',
-                    skills: parsed_data.skills || [],
-                    experience: parsed_data.experience || [],
-                    education: parsed_data.education || []
-                }));
-            }
-
-            // Move to Review Step
             setStep(2);
 
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError('Could not analyze resume. Please try again or skip.');
+            setError(err.message || 'Could not analyze resume. Please try again or skip.');
         } finally {
             setParsing(false);
         }
@@ -184,6 +152,21 @@ export const OnboardingPage: React.FC = () => {
             if (!response.ok) {
                 throw new Error('Failed to save profile');
             }
+
+            // Also update the unified persona for AI context
+            const personaUpdate = {
+                professional_title: formData.headline,
+                summary: formData.summary,
+                top_skills: formData.skills,
+                experience_highlights: formData.experience,
+                education: formData.education,
+            };
+
+            await fetch(`/api/resume/persona/${user?.id || 'default'}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ persona: personaUpdate })
+            });
 
             // Navigate to home dashboard after successful onboarding
             navigate('/home');

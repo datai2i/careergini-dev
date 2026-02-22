@@ -9,8 +9,8 @@ interface ProfileData {
     title: string;
     bio: string;
     skills: string[];
-    experience: string;
-    education: string;
+    experience: any[] | string;
+    education: any[] | string;
 }
 
 export const ProfilePage: React.FC = () => {
@@ -189,13 +189,19 @@ export const ProfilePage: React.FC = () => {
                         {editing ? (
                             <input
                                 type="text"
-                                value={profile.experience}
+                                value={typeof profile.experience === 'string' ? profile.experience : profile.experience.length + ' roles'}
                                 onChange={(e) => setProfile({ ...profile, experience: e.target.value })}
                                 placeholder="Years of experience"
                                 className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-3 py-2"
                             />
                         ) : (
-                            <span className="text-gray-700 dark:text-gray-300">{profile.experience} years experience</span>
+                            <span className="text-gray-700 dark:text-gray-300">
+                                {typeof profile.experience === 'string'
+                                    ? `${profile.experience} years experience`
+                                    : Array.isArray(profile.experience)
+                                        ? `${profile.experience.length} roles listed`
+                                        : 'Experience details'}
+                            </span>
                         )}
                     </div>
                 </div>
@@ -237,12 +243,26 @@ export const ProfilePage: React.FC = () => {
                 {editing ? (
                     <input
                         type="text"
-                        value={profile.education}
+                        value={typeof profile.education === 'string' ? profile.education : 'Detailed Education Records'}
                         onChange={(e) => setProfile({ ...profile, education: e.target.value })}
                         className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-4 py-3"
                     />
                 ) : (
-                    <p className="text-gray-700 dark:text-gray-300">{profile.education}</p>
+                    <div className="text-gray-700 dark:text-gray-300">
+                        {typeof profile.education === 'string' ? (
+                            <p>{profile.education}</p>
+                        ) : Array.isArray(profile.education) ? (
+                            <ul className="list-disc list-inside space-y-2">
+                                {profile.education.map((edu, idx) => (
+                                    <li key={idx}>
+                                        {edu?.degree || edu?.title} - {edu?.school || edu?.institution} {edu?.year ? `(${edu.year})` : ''}
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p>Education Details</p>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

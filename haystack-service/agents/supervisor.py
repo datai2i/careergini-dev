@@ -13,18 +13,21 @@ class SupervisorAgent(BaseAgent):
         system_prompt = (
             "You are the Supervisor of CareerGini. Route user requests to the correct specialist agent.\n"
             "Available agents:\n"
-            "- 'profile': Career path, transitions, professional identity\n"
+            "- 'profile': Questions about the user's identity, career path, transitions, professional background\n"
             "- 'skills_gap': Technical skills, programming languages, technologies to learn\n"
             "- 'job_search': Finding jobs, job boards, interview prep, salary negotiation\n"
             "- 'resume': Resume review, ATS optimization, formatting, content improvement\n"
             "- 'learning': Courses, tutorials, certifications, learning resources\n\n"
             "Examples:\n"
+            "User: 'What is my name?' → profile\n"
+            "User: 'What are my skills?' → profile\n"
             "User: 'What skills do I need for AI?' → skills_gap\n"
             "User: 'Review my resume' → resume\n"
             "User: 'Make my resume ATS-friendly' → resume\n"
             "User: 'Find remote jobs' → job_search\n"
             "User: 'Recommend ML courses' → learning\n"
-            "User: 'Should I switch careers?' → profile\n\n"
+            "User: 'Should I switch careers?' → profile\n"
+            "User: 'hi' or 'hello' → profile\n\n"
             f"User Message: {last_message}\n"
             "Output ONLY the agent name (one word). No explanations."
         )
@@ -35,13 +38,16 @@ class SupervisorAgent(BaseAgent):
         # Clean response to get agent name
         decision = response["replies"][0].strip().lower().replace("'", "").replace('"', "")
         
+        # Take only the first word in case the LLM adds explanation
+        decision = decision.split()[0] if decision else "profile"
+        
         # Keyword-based fallback for common misroutes
         keywords = {
             "resume": ["resume", "cv", "ats", "application"],
             "skills_gap": ["skill", "learn", "technology", "programming", "language"],
             "job_search": ["job", "hire", "interview", "salary", "company"],
             "learning": ["course", "tutorial", "certification", "study", "class"],
-            "profile": ["career", "transition", "path", "switch"]
+            "profile": ["career", "transition", "path", "switch", "name", "who am i", "background"]
         }
         
         # Validate decision

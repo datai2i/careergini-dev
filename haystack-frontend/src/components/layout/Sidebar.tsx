@@ -23,13 +23,13 @@ import clsx from 'clsx';
 
 const navItems = [
     { icon: Home, label: 'Home', path: '/home' },
-    { icon: MessageSquare, label: 'AI Chat', path: '/chat' },
     { icon: FileText, label: 'Resume Builder', path: '/resume-builder' },
     { icon: Briefcase, label: 'Jobs', path: '/jobs' },
     { icon: BookOpen, label: 'Learning', path: '/learning' },
 ];
 
 const aiToolItems = [
+    { icon: MessageSquare, label: 'AI Chat', path: '/chat' },
     { icon: Target, label: 'Skill Gaps', path: '/skill-gaps' },
     { icon: Mic, label: 'Interview Prep', path: '/interview-practice' },
     { icon: Map, label: 'Career Roadmap', path: '/career-roadmap' },

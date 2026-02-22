@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -10,6 +11,7 @@ interface Message {
 
 export const ChatPage: React.FC = () => {
     const { user } = useAuth();
+    const { showToast } = useToast();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -138,6 +140,7 @@ export const ChatPage: React.FC = () => {
                 newMessages[newMessages.length - 1].content = 'Error: Could not connect to AI service.';
                 return newMessages;
             });
+            showToast('Failed to get AI response', 'error');
         } finally {
             setLoading(false);
         }
@@ -178,7 +181,7 @@ export const ChatPage: React.FC = () => {
                     </div>
                 ))}
 
-                {loading && (
+                {loading && messages[messages.length - 1]?.content === '' && (
                     <div className="flex gap-4">
                         <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center flex-shrink-0">
                             <Bot size={16} />

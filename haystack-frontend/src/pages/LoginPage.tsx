@@ -34,11 +34,8 @@ export const LoginPage: React.FC = () => {
                     {/* Header */}
                     <div className="text-center mb-8">
                         <h1 className="text-3xl font-bold text-white mb-3">
-                            Welcome to Haystack
+                            Welcome Back
                         </h1>
-                        <p className="text-amber-300 text-sm font-semibold mb-2">
-                            🧪 Experimental Version
-                        </p>
                         <p className="text-gray-300 text-base">
                             Sign in to access your AI Career Assistant
                         </p>

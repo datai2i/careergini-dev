@@ -29,10 +29,8 @@ app.get('/health', (req, res) => {
 // --- Auth Routes ---
 
 const getFrontendUrl = (state) => {
-    if (state === 'haystack') {
-        return process.env.HAYSTACK_FRONTEND_URL || 'http://51.89.225.112.nip.io:81';
-    }
-    return process.env.FRONTEND_URL || 'http://localhost:5173';
+    // Both legacy and haystack versions now securely route through the same production domain
+    return process.env.FRONTEND_URL || 'https://www.careergini.com';
 };
 
 // Google

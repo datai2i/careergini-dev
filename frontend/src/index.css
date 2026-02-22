@@ -1,5 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
-
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -56,9 +56,30 @@
       opacity: 1;
     }
   }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(110%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes shrinkBar {
+    from {
+      width: 100%;
+    }
+
+    to {
+      width: 0%;
+    }
+  }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Base styles */
 body {

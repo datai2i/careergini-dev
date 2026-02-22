@@ -11,13 +11,16 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    allowedHosts: ['careergini.com', 'www.careergini.com', '51.89.225.112.nip.io', 'localhost'],
     hmr: {
-      host: '51.89.225.112.nip.io',
+      host: 'www.careergini.com',
     },
     proxy: {
       '/api': {
-        target: process.env.VITE_API_TARGET || 'http://api-gateway:3000',
+        target: process.env.VITE_API_TARGET || 'http://haystack-api-gateway:3000',
         changeOrigin: true,
+        proxyTimeout: 600000,
+        timeout: 600000,
       },
     },
   },

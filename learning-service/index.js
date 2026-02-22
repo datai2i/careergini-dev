@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const redis = require('redis');
+const { Pool } = require('pg');
 const { YouTubeClient, EdXClient, CourseraClient } = require('./integrations/courseApis');
 require('dotenv').config();
 
@@ -19,6 +20,26 @@ const redisClient = redis.createClient({
 
 redisClient.on('error', (err) => console.error('Redis error:', err));
 redisClient.connect().catch(err => console.error('Redis connection error:', err));
+
+// Postgres client for progress tracking
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL || 'postgresql://careergini:changeme@postgres:5432/careergini'
+});
+
+// Create table if not exists
+pool.query(`
+    CREATE TABLE IF NOT EXISTS user_learning_progress (
+        id SERIAL PRIMARY KEY,
+        user_id UUID NOT NULL,
+        course_id VARCHAR(255) NOT NULL,
+        course_data JSONB NOT NULL,
+        progress_seconds INTEGER DEFAULT 0,
+        is_completed BOOLEAN DEFAULT FALSE,
+        last_watched TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, course_id)
+    );
+`).catch(err => console.error('Error creating user_learning_progress table:', err));
+
 
 // API clients
 const youtube = new YouTubeClient();
@@ -80,7 +101,8 @@ app.get('/health', (req, res) => {
 // Get courses with filtering
 app.get('/courses', async (req, res) => {
     try {
-        const { topic = '', level = '', platform = '', skills = '' } = req.query;
+        let { topic = '', level = '', platform = '', skills = '' } = req.query;
+        if (platform === 'all') platform = '';
         const skillsArray = skills ? skills.split(',').map(s => s.trim()) : [];
 
         // Check cache
@@ -89,7 +111,13 @@ app.get('/courses', async (req, res) => {
 
         if (cached) {
             console.log('✓ Cache HIT for courses:', cacheKey);
-            const courses = JSON.parse(cached);
+            let courses = JSON.parse(cached);
+
+            // Hard filter by platform even if cached
+            if (platform) {
+                courses = courses.filter(course => course.platform === platform);
+            }
+
             // Apply skill matching even on cached results
             const matched = skillsArray.length > 0 ? matchCoursesToSkills(courses, skillsArray) : courses;
             return res.json(matched);
@@ -125,9 +153,16 @@ app.get('/courses', async (req, res) => {
         allCourses = rankCourses(allCourses);
 
         // Filter by level if specified
-        if (level) {
+        if (level && level !== 'all') {
             allCourses = allCourses.filter(course =>
                 course.level.toLowerCase().includes(level.toLowerCase())
+            );
+        }
+
+        // Hard filter by platform
+        if (platform && platform !== 'all') {
+            allCourses = allCourses.filter(course =>
+                course.platform === platform
             );
         }
 
@@ -179,6 +214,55 @@ app.get('/recommendations', async (req, res) => {
     } catch (error) {
         console.error('Error fetching recommended courses:', error);
         res.status(500).json({ error: 'Failed to fetch recommendations' });
+    }
+});
+
+// Save learning progress
+app.post('/progress', async (req, res) => {
+    try {
+        const { user_id, course_id, course_data, progress_seconds, is_completed } = req.body;
+
+        if (!user_id || !course_id) {
+            return res.status(400).json({ error: 'user_id and course_id are required' });
+        }
+
+        const result = await pool.query(
+            `INSERT INTO user_learning_progress (user_id, course_id, course_data, progress_seconds, is_completed, last_watched)
+             VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+             ON CONFLICT (user_id, course_id) 
+             DO UPDATE SET 
+                course_data = EXCLUDED.course_data,
+                progress_seconds = GREATEST(user_learning_progress.progress_seconds, EXCLUDED.progress_seconds),
+                is_completed = CASE WHEN EXCLUDED.is_completed = TRUE THEN TRUE ELSE user_learning_progress.is_completed END,
+                last_watched = CURRENT_TIMESTAMP
+             RETURNING *`,
+            [user_id, course_id, course_data || {}, progress_seconds || 0, is_completed || false]
+        );
+
+        res.json(result.rows[0]);
+    } catch (error) {
+        console.error('Error saving progress:', error);
+        res.status(500).json({ error: 'Failed to save progress' });
+    }
+});
+
+// Get learning progress
+app.get('/progress', async (req, res) => {
+    try {
+        const { user_id } = req.query;
+        if (!user_id) {
+            return res.status(400).json({ error: 'user_id is required' });
+        }
+
+        const result = await pool.query(
+            'SELECT * FROM user_learning_progress WHERE user_id = $1 ORDER BY last_watched DESC',
+            [user_id]
+        );
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching progress:', error);
+        res.status(500).json({ error: 'Failed to fetch progress' });
     }
 });
 

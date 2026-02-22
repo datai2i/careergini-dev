@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, FileText, CheckCircle, Download, ArrowRight, RefreshCw, AlertCircle, History, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { notifyStep, requestNotificationPermission } from '../utils/notify';
+import { useToast } from '../context/ToastContext';
 
 interface ResumePersona {
     full_name: string;
@@ -18,6 +20,7 @@ interface ResumePersona {
 
 export const ResumeBuilderPage: React.FC = () => {
     const { user } = useAuth();
+    const { showToast } = useToast();
     const [step, setStep] = useState(1);
     const [uploading, setUploading] = useState(false);
     const [persona, setPersona] = useState<ResumePersona | null>(null);
@@ -35,6 +38,9 @@ export const ResumeBuilderPage: React.FC = () => {
 
     // Load existing persona on mount
     useEffect(() => {
+        // Ask for notification permission as soon as the user enters the builder
+        requestNotificationPermission();
+
         if (user) {
             fetch(`/api/resume/persona/${user.id}`)
                 .then(res => res.json())
@@ -106,6 +112,8 @@ export const ResumeBuilderPage: React.FC = () => {
                 if (response.ok) {
                     setPersona(data.persona);
                     setStep(2);
+                    notifyStep('✅ Resume Parsed!', 'Your resume has been analysed. Ready to set your target role.');
+                    showToast('Resume parsed successfully', 'success');
                 } else {
                     setError(data.detail || 'Upload failed');
                 }
@@ -154,6 +162,8 @@ export const ResumeBuilderPage: React.FC = () => {
 
                 setTailoredContent(completeTailoredPersona);
                 setStep(4);
+                notifyStep('✅ Resume Tailored!', 'Your resume has been customised for the job. Review and generate your PDF.');
+                showToast('Resume tailored to the job!', 'success');
                 // Refresh sessions list after successful tailoring
                 fetch(`/api/resume/sessions/${user?.id || 'default'}`)
                     .then(r => r.json()).then(d => { if (d.sessions) setSessions(d.sessions); });
@@ -190,6 +200,8 @@ export const ResumeBuilderPage: React.FC = () => {
             if (pdfResponse.ok) {
                 setPdfUrl(pdfData.pdf_url);
                 setStep(5);
+                notifyStep('🎉 PDF Ready!', 'Your professional resume PDF has been generated. Click to download!');
+                showToast('PDF ready to download! 🎉', 'success');
             } else {
                 setError(pdfData.detail || "Failed to generate PDF");
             }
@@ -308,8 +320,8 @@ export const ResumeBuilderPage: React.FC = () => {
                                 onClick={() => { if (persona) setStep(3); }}
                                 disabled={!persona}
                                 className={`w-full px-5 py-2.5 rounded-xl font-medium border-2 transition-all inline-flex items-center justify-center ${persona
-                                        ? 'border-emerald-400 text-emerald-700 hover:bg-emerald-50'
-                                        : 'border-gray-200 text-gray-400 cursor-not-allowed'
+                                    ? 'border-emerald-400 text-emerald-700 hover:bg-emerald-50'
+                                    : 'border-gray-200 text-gray-400 cursor-not-allowed'
                                     }`}
                             >
                                 <ArrowRight className="w-4 h-4 mr-2" />
