@@ -101,7 +101,7 @@ services:
   profile-service:
     build:
       context: ./profile-service
-      dockerfile: Dockerfile
+      dockerfile: ../docker/profile-service.Dockerfile
     container_name: careergini-profile
     volumes:
       - ./profile-service:/app
