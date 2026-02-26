@@ -26,13 +26,28 @@ export const LoginPage: React.FC = () => {
         },
         {
             icon: <Target className="w-8 h-8 text-purple-500" />,
-            title: "Intelligent Job Matching",
-            description: "Stop scrolling endlessly. CareerGini scans thousands of remote and global listings to find the roles you're actually qualified for."
+            title: "Industry-Specific Tailoring",
+            description: "Dominate your niche. Adapt your resume vocabulary specifically for Tech/SaaS, Finance, Healthcare, Creative Agencies, and more."
+        },
+        {
+            icon: <Zap className="w-8 h-8 text-amber-500" />,
+            title: "Strategic Tone Control",
+            description: "Choose your narrative pitch. Scale from 'Standard ATS Optimization' to 'Metrics & Revenue Focused', or 'Leadership & Strategy'."
+        },
+        {
+            icon: <ShieldCheck className="w-8 h-8 text-green-500" />,
+            title: "ATS Score Regeneration",
+            description: "Get instant ATS scoring feedback on your tailored drafts, with the one-click ability to continuously regenerate for a higher match."
         },
         {
             icon: <MessageSquare className="w-8 h-8 text-indigo-500" />,
             title: "Context-Aware GINI Chat",
             description: "Chat with an AI career coach that truly knows you. GINI remembers your skills, goals, and experience to provide actionable advice."
+        },
+        {
+            icon: <Star className="w-8 h-8 text-pink-500" />,
+            title: "Full Editing Control",
+            description: "Review your full baseline profile and edit AI-generated bullets before finalizing. Export beautiful, hyperlinked PDFs in seconds."
         }
     ];
 
