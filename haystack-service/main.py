@@ -64,6 +64,11 @@ class DraftResumeRequest(BaseModel):
     professional_title: str
     summary: str
     top_skills: List[str]
+    email: Optional[str] = ""
+    phone: Optional[str] = ""
+    location: Optional[str] = ""
+    linkedin: Optional[str] = ""
+    portfolio_url: Optional[str] = ""
     experience_highlights: List[Dict[str, str]]
     education: List[Dict[str, str]]
 
@@ -96,9 +101,11 @@ class ResumeTailorRequest(BaseModel):
     user_id: str
     job_description: str = ""
     persona: Optional[Dict[str, Any]] = None
-    template: Optional[str] = "classic"
+    template: Optional[str] = "professional"
     profile_pic: Optional[str] = None
     page_count: Optional[int] = 2  # 1 = single page, 2 = full detail
+    target_industry: Optional[str] = None
+    focus_area: Optional[str] = None
 
 @app.post("/resume/upload")
 async def upload_resume(
@@ -231,6 +238,11 @@ async def draft_resume(request: DraftResumeRequest):
             "summary": request.summary,
             "top_skills": request.top_skills,
             "skills": request.top_skills, # duplicate for broader compat
+            "email": request.email,
+            "phone": request.phone,
+            "location": request.location,
+            "linkedin": request.linkedin,
+            "portfolio_url": request.portfolio_url,
             "experience_highlights": request.experience_highlights,
             "experience": request.experience_highlights, 
             "education": request.education,
@@ -258,7 +270,7 @@ async def draft_resume(request: DraftResumeRequest):
                         "full_name": request.full_name,
                         "headline": request.professional_title,
                         "summary": request.summary,
-                        "location": "",
+                        "location": request.location,
                         "skills": request.top_skills,
                         "experience": request.experience_highlights,
                         "education": request.education,
@@ -448,7 +460,13 @@ async def tailor_resume_endpoint(request: ResumeTailorRequest):
             else:
                 raise HTTPException(status_code=400, detail="No persona provided or found. Please upload resume first.")
         
-        result = await agent.tailor_resume(persona, request.job_description)
+        result = await agent.tailor_resume(
+            persona=persona,
+            job_description=request.job_description,
+            target_industry=request.target_industry,
+            focus_area=request.focus_area,
+            template=request.template or "professional"
+        )
         
         # Calculate ATS Score on the tailored result
         # To score, we need a flat text representation of the tailored persona

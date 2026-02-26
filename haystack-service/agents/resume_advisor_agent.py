@@ -62,7 +62,7 @@ class TailorResumeComponent:
         self.generator = generator
 
     @component.output_types(tailored_result=Dict[str, Any])
-    def run(self, persona: Dict[str, Any], job_description: str):
+    def run(self, persona: Dict[str, Any], job_description: str, target_industry: str = "", focus_area: str = "", template: str = "professional"):
         # Pass the full authentic experience (up to 6 roles, 300 chars each)
         experiences = [
             _fmt_exp(e)
@@ -79,18 +79,33 @@ class TailorResumeComponent:
         }
         slim_jd = str(job_description)[:700]
 
+        industry_prompt = f"- Align the vocabulary and metrics to the {target_industry} industry standard." if target_industry else ""
+        focus_prompt = f"- Give special emphasis to {focus_area} in the summary and bullets." if focus_area else ""
+
+        # ── Template-specific tailoring instructions ──────────────────────────
+        if template == "executive":
+            template_rules = """- Write all bullet points as leadership-impact statements: lead with scope (team size, budget, P&L) then outcome.
+- Generate a 4-5 sentence executive narrative summary (strategic vision + career arc + value proposition).
+- Reframe skills as 9 leadership domains / competency areas (not just tool names). E.g. "P&L Management", "Enterprise Sales", "Cross-Functional Leadership".
+- Quantify everything possible: revenue, headcount, growth %, cost savings, cycle time reduction.
+- Tone: authoritative, visionary, board-room ready. No first-person pronouns."""
+        else:
+            template_rules = """- Write all bullet points as concise metric-driven ATS-optimised statements (action verb → task → quantified result).
+- Generate a tight 3-sentence professional summary (current title + top 2 skills + value to employer).
+- Include exact keyword phrases from the JD in skills list for maximum ATS match.
+- Tone: professional and confident. No jargon. Sentences under 20 words each."""
+
         prompt = f"""You are a professional resume writer. Tailor this candidate's resume for the job below.
 
 STRICT RULES:
 - DO NOT invent any job titles, companies, projects, or dates that are not in the candidate data.
 - DO NOT add fake achievements. Only rewrite and improve existing ones with stronger action verbs and quantifiable metrics where possible.
-- Act as a senior executive resume writer. Use Harvard Business School standard formatting. Keep sentences punchy and impactful.
 - Generate 3-4 impactful bullet points per role based ONLY on the provided highlights.
-- Produce a 3-sentence professional summary (Objective) aligned with the JD.
-- Output order MUST strictly respect the reference layout: Objective (Summary) -> Education -> Projects -> Experience -> Skills.
-- Include ALL skills that genuinely match the JD from the candidate's list.
-- Return the candidate's Education details exactly as provided, OR slightly reformat them for professionalism, but DO NOT drop them.
-- If the candidate has Projects, include them and tailor their descriptions similarly to the experience.
+{template_rules}
+{industry_prompt}
+{focus_prompt}
+- Return the candidate's Education details exactly as provided.
+- If the candidate has Projects, include and tailor their descriptions.
 - Output ONLY valid JSON. No preamble or explanation.
 
 Candidate:
@@ -100,7 +115,7 @@ Job Description (excerpt):
 {slim_jd}
 
 Required JSON:
-{{"tailored_summary":"3-sentence professional summary","tailored_skills":["skill1","skill2","skill3"],"tailored_experience":[{{"role":"Exact role from data","company":"Exact company from data","duration":"Exact dates from data","tailored_bullets":["Strong action bullet 1","Strong action bullet 2","Strong action bullet 3"]}}],"tailored_projects":[{{"name":"Project Name","description":"Tailored Description"}}],"education":[{{"degree":"Degree","school":"School","year":"Year"}}],"match_analysis":"1-2 sentences on candidate fit"}}"""
+{{"tailored_summary":"summary text","tailored_skills":["skill1","skill2"],"tailored_experience":[{{"role":"Exact role","company":"Exact company","duration":"Exact dates","tailored_bullets":["Bullet 1","Bullet 2","Bullet 3"]}}],"tailored_projects":[{{"name":"Project Name","description":"Tailored Description"}}],"education":[{{"degree":"Degree","school":"School","year":"Year"}}],"match_analysis":"1-2 sentences on candidate fit"}}"""
 
         try:
             response = self.generator.run(prompt=prompt)
@@ -129,15 +144,20 @@ class CoverLetterComponent:
         self.generator = generator
 
     @component.output_types(cover_letter=str)
-    def run(self, persona: Dict[str, Any], job_description: str):
+    def run(self, persona: Dict[str, Any], job_description: str, target_industry: str = "", focus_area: str = ""):
         name  = persona.get("full_name", "Candidate")
         title = persona.get("professional_title", "Professional")
         top3  = (persona.get("top_skills") or [])[:3]
         slim_jd = str(job_description)[:500]
 
+        industry_prompt = f"- Use tone appropriate for the {target_industry} industry." if target_industry else ""
+        focus_prompt = f"- Emphasize {focus_area}." if focus_area else ""
+
         prompt = f"""Write a professional cover letter for {name} ({title}) applying to this role.
 
 Rules:
+{industry_prompt}
+{focus_prompt}
 - MAXIMUM 150 words total. Be crisp and punchy.
 - 2 short paragraphs only: (1) intro + value proposition, (2) call to action.
 - Mention 2-3 specific skills: {', '.join(top3)}.
@@ -232,9 +252,9 @@ Required JSON structure (extract real info only):
                 "suggested_roles":       [],
             }
 
-    async def tailor_resume(self, persona: Dict[str, Any], job_description: str) -> Dict[str, Any]:
-        """Tailor persona to a JD, running components sequentially to avoid Ollama queue issues."""
-        print("Resume Advisor Agent tailoring resume sequentially...")
+    async def tailor_resume(self, persona: Dict[str, Any], job_description: str, target_industry: str = "", focus_area: str = "", template: str = "professional") -> Dict[str, Any]:
+        """Tailor persona to a JD, running components sequentially."""
+        print(f"Resume Advisor Agent tailoring resume [{template}]...")
 
         tailor_comp = TailorResumeComponent(self.generator)
         cl_comp     = CoverLetterComponent(self.generator)
@@ -243,11 +263,11 @@ Required JSON structure (extract real info only):
 
         tailor_result = await loop.run_in_executor(
             None,
-            lambda: tailor_comp.run(persona=persona, job_description=job_description)
+            lambda: tailor_comp.run(persona=persona, job_description=job_description, target_industry=target_industry, focus_area=focus_area, template=template)
         )
         cl_result = await loop.run_in_executor(
             None,
-            lambda: cl_comp.run(persona=persona, job_description=job_description)
+            lambda: cl_comp.run(persona=persona, job_description=job_description, target_industry=target_industry, focus_area=focus_area)
         )
 
         final = tailor_result["tailored_result"]
