@@ -44,7 +44,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 
 # 1. Pull latest code
 log "Pulling latest code..."
-git pull origin main && success "Code updated" || warn "Git pull failed (continuing)"
+git pull origin master && success "Code updated" || warn "Git pull failed (continuing)"
 
 # 2. Build Docker images
 if [ "$BUILD" = true ]; then

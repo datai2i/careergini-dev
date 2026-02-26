@@ -66,7 +66,7 @@ services:
   # ─────────────────────────────────────────
   ai-service:
     build:
-      context: ./ai-service
+      context: ./haystack-service
       dockerfile: Dockerfile
     container_name: careergini-ai
     restart: unless-stopped
@@ -166,7 +166,7 @@ services:
   # ─────────────────────────────────────────
   api-gateway:
     build:
-      context: ./api-gateway
+      context: ./haystack-api-gateway
       dockerfile: Dockerfile
     container_name: careergini-gateway
     restart: unless-stopped
@@ -195,7 +195,7 @@ services:
   # ─────────────────────────────────────────
   frontend:
     build:
-      context: ./frontend
+      context: ./haystack-frontend
       dockerfile: Dockerfile
       args:
         - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
