@@ -297,7 +297,7 @@ export const LoginPage: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Basic Plan */}
+                        {/* Starter Plan */}
                         <div className="relative flex flex-col p-8 rounded-3xl border-2 border-blue-500 bg-white dark:bg-slate-800 shadow-2xl shadow-blue-500/20 hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-1">
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                                 <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-blue-600 text-white shadow-lg shadow-blue-500/40">
@@ -308,27 +308,27 @@ export const LoginPage: React.FC = () => {
                                 <div className="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-4">
                                     <BookOpen className="w-6 h-6 text-blue-600" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Basic</h3>
+                                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Starter</h3>
                                 <div className="flex items-end gap-2 mt-3">
                                     <span className="text-5xl font-extrabold text-blue-600">$5</span>
                                     <span className="text-gray-500 dark:text-gray-400 mb-2">one-time</span>
                                 </div>
                                 <div className="mt-3 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg inline-flex items-center gap-2">
-                                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300">10 builds · just $0.50 each</span>
-                                    <span className="text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">50% off</span>
+                                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300">5 builds · just $1.00 each</span>
+                                    <span className="text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">Save 20%</span>
                                 </div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">Pay once, use whenever. Perfect for active job hunters targeting multiple roles across different industries simultaneously.</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">Pay once, use whenever. Perfect for focused job hunters targeting a few key roles with industry-leading AI precision.</p>
                             </div>
 
                             <ul className="space-y-3 mb-8 flex-1">
                                 {[
-                                    { text: '10 AI-tailored resume builds', included: true },
+                                    { text: '5 AI-tailored resume builds', included: true },
                                     { text: 'Industry & tone tailoring engine', included: true },
                                     { text: 'ATS score & 1-click regeneration', included: true },
                                     { text: 'Beautiful PDF with clickable hyperlinks', included: true },
-                                    { text: 'Gini Guide — Top 3 personalised role picks', included: true },
+                                    { text: 'Cover letter auto-generation', included: true },
                                     { text: 'Credits never expire — use at your pace', included: true },
-                                    { text: 'GINI Chat AI career coach', included: false },
+                                    { text: 'GINI Chat career coach', included: false },
                                     { text: 'Hyper-personalised job search & Learning Hub', included: false },
                                 ].map((item, i) => (
                                     <li key={i} className="flex items-start gap-3">
@@ -339,7 +339,7 @@ export const LoginPage: React.FC = () => {
                             </ul>
 
                             <button onClick={() => handleLogin('google')} className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:-translate-y-0.5 transition-all duration-200">
-                                Get 10 Builds — Pay Just $5
+                                Get 5 Builds — Pay Just $5
                             </button>
                         </div>
 
@@ -347,7 +347,7 @@ export const LoginPage: React.FC = () => {
                         <div className="relative flex flex-col p-8 rounded-3xl border-2 border-purple-500 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 dark:bg-slate-800 shadow-lg hover:shadow-purple-500/20 transition-all duration-300 hover:-translate-y-1">
                             <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                                 <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/40">
-                                    <Star className="w-3.5 h-3.5" /> Full Power
+                                    <Star className="w-3.5 h-3.5" /> Accelerated
                                 </span>
                             </div>
                             <div className="mb-6">
@@ -360,23 +360,22 @@ export const LoginPage: React.FC = () => {
                                     <span className="text-gray-500 dark:text-gray-400 mb-2">one-time</span>
                                 </div>
                                 <div className="mt-3 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 rounded-lg inline-flex items-center gap-2">
-                                    <span className="text-xs font-bold text-purple-700 dark:text-purple-300">100 builds · just $0.25 each</span>
-                                    <span className="text-xs font-semibold text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">75% off</span>
+                                    <span className="text-xs font-bold text-purple-700 dark:text-blue-300">20 builds · just $1.25 each</span>
+                                    <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-0.5 rounded-full">AI Coach Unlocked</span>
                                 </div>
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">The complete career acceleration engine — every AI tool unlocked. Pay once, use for as long as your career journey demands.</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">The complete career acceleration engine — Gini Chat & Job Search unlocked. Pay once, use for as long as your journey demands.</p>
                             </div>
 
                             <ul className="space-y-3 mb-8 flex-1">
                                 {[
-                                    { text: '100 AI-tailored resume builds', included: true },
+                                    { text: '20 AI-tailored resume builds', included: true },
                                     { text: 'Industry & tone tailoring engine', included: true },
                                     { text: 'ATS score & unlimited regeneration', included: true },
                                     { text: 'Beautiful PDF with clickable hyperlinks', included: true },
-                                    { text: 'Full Gini Guide suite — personalised career roadmap', included: true },
-                                    { text: 'Hyper-personalised global job search', included: true },
-                                    { text: 'Learning Hub — close skill gaps with curated courses', included: true },
                                     { text: 'GINI Chat — unlimited AI career coach sessions', included: true },
-                                    { text: 'Credits never expire — use at your pace', included: true },
+                                    { text: 'Hyper-personalised global job search', included: true },
+                                    { text: 'Learning Hub — skills & courses', included: true },
+                                    { text: 'Credits never expire', included: true },
                                 ].map((item, i) => (
                                     <li key={i} className="flex items-start gap-3">
                                         <Check className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
@@ -386,7 +385,7 @@ export const LoginPage: React.FC = () => {
                             </ul>
 
                             <button onClick={() => handleLogin('google')} className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5 transition-all duration-200">
-                                Unlock Everything — Pay Just $25
+                                Upgrade to Premium — Pay $25
                             </button>
                         </div>
 

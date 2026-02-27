@@ -614,7 +614,7 @@ async def generate_resume_pdf(request: ResumeTailorRequest):
         count = int(user_info.get("resume_count", 0))
 
         # Define limits
-        limits = {"free": 1, "basic": 10, "premium": 100}
+        limits = {"free": 1, "basic": 5, "premium": 20}
         max_builds = limits.get(plan, 1)
 
         if role != "admin" and count >= max_builds:

@@ -25,7 +25,7 @@ interface AdminUser {
     email: string;
     full_name: string;
     role: 'user' | 'admin';
-    plan: 'free' | 'basic' | 'premium';
+    plan: 'free' | 'basic' | 'premium' | 'ultra_premium';
     created_at: string;
     last_login_at: string | null;
     login_count: number;
@@ -209,12 +209,14 @@ export const AdminDashboardPage: React.FC = () => {
                                     {stats?.plans?.map(p => (
                                         <div key={p.plan} className="space-y-1">
                                             <div className="flex justify-between text-sm">
-                                                <span className="capitalize text-slate-600">{p.plan}</span>
+                                                <span className="capitalize text-slate-600">
+                                                    {p.plan === 'basic' ? 'Starter' : p.plan === 'ultra_premium' ? 'Ultra Premium' : p.plan}
+                                                </span>
                                                 <span className="font-semibold">{p.count} users</span>
                                             </div>
                                             <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                                                 <div
-                                                    className={`h-full ${p.plan === 'premium' ? 'bg-blue-600' : p.plan === 'basic' ? 'bg-amber-500' : 'bg-slate-400'}`}
+                                                    className={`h-full ${p.plan === 'premium' ? 'bg-purple-600' : p.plan === 'basic' ? 'bg-blue-600' : p.plan === 'ultra_premium' ? 'bg-amber-500' : 'bg-slate-400'}`}
                                                     style={{ width: `${stats?.total_users ? (parseInt(p.count) / stats.total_users) * 100 : 0}%` }}
                                                 />
                                             </div>
@@ -287,14 +289,16 @@ export const AdminDashboardPage: React.FC = () => {
                                                 <select
                                                     value={u.plan}
                                                     onChange={(e) => updateUser(u.id, { plan: e.target.value as any })}
-                                                    className={`text-xs font-bold px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500/20 capitalize ${u.plan === 'premium' ? 'bg-blue-100 text-blue-700' :
-                                                            u.plan === 'basic' ? 'bg-amber-100 text-amber-700' :
+                                                    className={`text-xs font-bold px-2 py-1 rounded-full border-0 focus:ring-2 focus:ring-blue-500/20 capitalize ${u.plan === 'premium' ? 'bg-purple-100 text-purple-700' :
+                                                        u.plan === 'basic' ? 'bg-blue-100 text-blue-700' :
+                                                            u.plan === 'ultra_premium' ? 'bg-amber-100 text-amber-700' :
                                                                 'bg-slate-100 text-slate-700'
                                                         }`}
                                                 >
                                                     <option value="free">Free</option>
-                                                    <option value="basic">Basic</option>
+                                                    <option value="basic">Starter</option>
                                                     <option value="premium">Premium</option>
+                                                    <option value="ultra_premium">Ultra Premium</option>
                                                 </select>
                                             </td>
                                             <td className="px-6 py-4">

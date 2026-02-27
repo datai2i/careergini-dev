@@ -5,6 +5,7 @@ import { notifyStep, requestNotificationPermission } from '../utils/notify';
 import { ProcessingOverlay } from '../components/common/ProcessingOverlay';
 import { useToast } from '../context/ToastContext';
 import { DraftResumeModal } from '../components/DraftResumeModal';
+import { UpgradePromptModal } from '../components/common/UpgradePromptModal';
 
 interface ResumePersona {
     full_name: string;
@@ -70,6 +71,7 @@ export const ResumeBuilderPage: React.FC = () => {
     const [coverLetterUrl, setCoverLetterUrl] = useState<string | null>(null);
     const [coverLetterDocxUrl, setCoverLetterDocxUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [pageCount, setPageCount] = useState<number>(2);
     const [sessions, setSessions] = useState<Array<{ session_id: string; timestamp: string; job_title_snippet: string }>>([]);
     const [loadingSession, setLoadingSession] = useState(false);
@@ -343,6 +345,20 @@ export const ResumeBuilderPage: React.FC = () => {
                 setCoverLetterUrl(pdfData.cover_letter_url || null);
                 setCoverLetterDocxUrl(pdfData.cover_letter_docx_url || null);
                 setStep(5);
+                await refreshUser(); // Update build count and plan info
+
+                // Show upgrade prompt if milestone reached
+                const currentPlan = user?.plan || 'free';
+                const count = (user?.resume_count || 0) + 1; // +1 since we just generated one
+
+                if (
+                    (currentPlan === 'free' && count >= 1) ||
+                    (currentPlan === 'basic' && count >= 5) ||
+                    (currentPlan === 'premium' && count >= 20)
+                ) {
+                    setTimeout(() => setShowUpgradeModal(true), 1500);
+                }
+
                 notifyStep('🎉 PDF Ready!', 'Your professional resume and cover letter have been generated. Click to download!');
                 showToast('Files ready to download! 🎉', 'success');
             } else {
@@ -1330,6 +1346,13 @@ export const ResumeBuilderPage: React.FC = () => {
                 isOpen={isDraftModalOpen}
                 onClose={() => setIsDraftModalOpen(false)}
                 onSave={handleDraftSave}
+            />
+            {/* Upgrade Prompt Modal */}
+            <UpgradePromptModal
+                isOpen={showUpgradeModal}
+                onClose={() => setShowUpgradeModal(false)}
+                currentPlan={user?.plan || 'free'}
+                buildCount={(user?.resume_count || 0)}
             />
         </div>
     );

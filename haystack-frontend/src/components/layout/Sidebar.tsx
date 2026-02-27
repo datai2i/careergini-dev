@@ -30,8 +30,11 @@ export const Sidebar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    const starterItems = [
+    const freeItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/home', accessKey: 'hasDashboard' },
+    ];
+
+    const starterItems = [
         { id: 'resume', label: 'Resume Builder', icon: FileText, path: '/resume-builder', accessKey: 'resumeBuilds' },
     ];
 
@@ -118,7 +121,12 @@ export const Sidebar: React.FC = () => {
             </div>
 
             <nav className="flex-1 px-4 space-y-1 overflow-y-auto py-4">
-                <div className="px-4 py-2 text-xs font-semibold text-blue-400 uppercase tracking-wider">
+                <div className="px-4 py-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+                    Free
+                </div>
+                {freeItems.map(item => <NavItem key={item.path} item={item} />)}
+
+                <div className="px-4 pt-4 py-2 text-xs font-semibold text-blue-400 uppercase tracking-wider">
                     Starter
                 </div>
                 {starterItems.map(item => <NavItem key={item.path} item={item} />)}
