@@ -1,3 +1,5 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Zap, ArrowRight, X, Check } from 'lucide-react';
 
 interface UpgradePromptModalProps {
@@ -8,6 +10,7 @@ interface UpgradePromptModalProps {
 }
 
 export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, onClose, currentPlan, buildCount }) => {
+    const navigate = useNavigate();
 
     if (!isOpen) return null;
 
@@ -17,25 +20,38 @@ export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, 
 
     let title = "Upgrade Your Plan";
     let message = "You've reached a milestone! Unlock more features to accelerate your career.";
-    let ctaText = "View Plans";
+    let ctaText = "Upgrade Now";
+    let nextPlan = 'starter';
     let features: string[] = [];
 
     if (isFree && buildCount >= 1) {
         title = "First Build Complete! 🎉";
-        message = "You've seen the power of AI tailoring. Now, unlock 5 more builds and industry-specific tailoring with the Starter plan.";
-        ctaText = "Upgrade to Starter";
-        features = ["5 AI-tailored resume builds", "Industry-specific tailoring", "Cover letter auto-generation", "Credits never expire"];
+        message = "You've experienced the power of AI tailoring. Unlock 5 more builds, industry-specific tailoring, and cover letter auto-generation with the Starter plan — just $5 one-time.";
+        ctaText = "Upgrade to Starter — $5 One-Time";
+        nextPlan = 'starter';
+        features = ["5 AI-tailored resume builds", "Industry-specific tailoring (Tech, Finance, Healthcare & more)", "ATS score + 1-click regeneration", "Cover letter auto-generation", "Credits never expire"];
     } else if (isStarter && buildCount >= 5) {
-        title = "Build Quota Reached";
-        message = "You've completed 5 builds! Ready to unlock the full potential of CareerGini with Gini Chat and Job Search?";
-        ctaText = "Upgrade to Premium";
-        features = ["20 AI-tailored resume builds", "Unlimited Gini Chat sessions", "Hyper-personalized Job Search", "Learning Hub access"];
+        title = "Starter Build Limit Reached";
+        message = "You've used all 5 Starter builds. Upgrade to Premium and unlock Gini Chat mentorship, the global Job Search, Learning Hub, and 20 builds — all for a single $25 payment.";
+        ctaText = "Upgrade to Premium — $25 One-Time";
+        nextPlan = 'premium';
+        features = ["20 AI-tailored resume builds", "Unlimited Gini Chat AI mentor sessions", "Hyper-personalised global job search", "Learning Hub — skills, courses & career roadmap", "Credits never expire"];
     } else if (isPremium && buildCount >= 20) {
-        title = "Power User Milestone!";
-        message = "You've utilized your 20 builds. Contact our team to reload your credits or ask about our upcoming Ultra Premium features.";
-        ctaText = "Contact Support to Reload";
-        features = ["Add more builds instantly", "Priority support", "Early access to new tools"];
+        title = "Power User — 20 Builds Used!";
+        message = "You've utilized your 20 Premium builds. Contact our team at team@datai2i.com to instantly reload your credits, or explore our upcoming Ultra Premium features.";
+        ctaText = "Contact Support to Reload Credits";
+        nextPlan = 'contact';
+        features = ["Instant credit reload", "Priority support", "Early access to Ultra Premium tools"];
     }
+
+    const handleCTA = () => {
+        onClose();
+        if (nextPlan === 'contact') {
+            window.location.href = 'mailto:team@datai2i.com?subject=Premium%20Quota%20Reload%20Request';
+        } else {
+            navigate(`/payment?plan=${nextPlan}`);
+        }
+    };
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
@@ -83,14 +99,7 @@ export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, 
 
                     <div className="flex flex-col gap-3">
                         <button
-                            onClick={() => {
-                                onClose();
-                                if (currentPlan?.toLowerCase() === 'premium') {
-                                    window.location.href = 'mailto:team@datai2i.com?subject=Quota Reload Request';
-                                } else {
-                                    window.location.href = '/login#pricing';
-                                }
-                            }}
+                            onClick={handleCTA}
                             className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
                         >
                             <span>{ctaText}</span>

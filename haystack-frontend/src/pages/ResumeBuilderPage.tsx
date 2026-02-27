@@ -309,6 +309,9 @@ export const ResumeBuilderPage: React.FC = () => {
                 // Refresh sessions list after successful tailoring
                 fetch(`/api/resume/sessions/${user?.id || 'default'}`)
                     .then(r => r.json()).then(d => { if (d.sessions) setSessions(d.sessions); });
+            } else if (response.status === 403) {
+                // Plan limit hit — show upgrade modal instead of error
+                setShowUpgradeModal(true);
             } else {
                 setError(data.detail || 'Tailoring failed');
             }
@@ -361,6 +364,9 @@ export const ResumeBuilderPage: React.FC = () => {
 
                 notifyStep('🎉 PDF Ready!', 'Your professional resume and cover letter have been generated. Click to download!');
                 showToast('Files ready to download! 🎉', 'success');
+            } else if (pdfResponse.status === 403) {
+                // Plan limit hit — show upgrade modal, NOT a raw error
+                setShowUpgradeModal(true);
             } else {
                 setError(pdfData.detail || "Failed to generate PDF");
             }

@@ -44,12 +44,27 @@ interface ChatLog {
     created_at: string;
 }
 
+interface PaymentTransaction {
+    id: number;
+    user_id: string;
+    user_email: string;
+    user_name: string;
+    gateway: string;
+    order_id: string;
+    amount: string;
+    currency: string;
+    plan: string;
+    status: string;
+    created_at: string;
+}
+
 export const AdminDashboardPage: React.FC = () => {
     const { showToast } = useToast();
-    const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'chats'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'chats' | 'payments'>('overview');
     const [stats, setStats] = useState<Stats | null>(null);
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [chats, setChats] = useState<ChatLog[]>([]);
+    const [payments, setPayments] = useState<PaymentTransaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [openActionId, setOpenActionId] = useState<string | null>(null);
@@ -78,6 +93,15 @@ export const AdminDashboardPage: React.FC = () => {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
             });
             if (resp.ok) setChats(await resp.json());
+        } catch (e) { console.error(e); }
+    };
+
+    const fetchPayments = async () => {
+        try {
+            const resp = await fetch('/api/profile/admin/payments', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('auth_token')}` }
+            });
+            if (resp.ok) setPayments(await resp.json());
         } catch (e) { console.error(e); }
     };
 
@@ -124,7 +148,7 @@ export const AdminDashboardPage: React.FC = () => {
 
     const refreshData = async () => {
         setLoading(true);
-        await Promise.all([fetchStats(), fetchUsers(), fetchChats()]);
+        await Promise.all([fetchStats(), fetchUsers(), fetchChats(), fetchPayments()]);
         setLoading(false);
     };
 
@@ -200,7 +224,8 @@ export const AdminDashboardPage: React.FC = () => {
                     {[
                         { id: 'overview', icon: Download, label: 'Overview' },
                         { id: 'users', icon: Check, label: 'User Management' },
-                        { id: 'chats', icon: MessageSquare, label: 'Chat Audit' }
+                        { id: 'chats', icon: MessageSquare, label: 'Chat Audit' },
+                        { id: 'payments', icon: Star, label: 'Payment Transactions' }
                     ].map(tab => (
                         <button
                             key={tab.id}
@@ -459,6 +484,58 @@ export const AdminDashboardPage: React.FC = () => {
                                 </div>
                             ))
                         )}
+                    </div>
+                )}
+
+                {activeTab === 'payments' && (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Date</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">User</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Gateway</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Plan</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Amount</th>
+                                    <th className="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-200">
+                                {payments.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} className="px-6 py-12 text-center text-slate-500">No payment transactions found.</td>
+                                    </tr>
+                                ) : (
+                                    payments.map(p => (
+                                        <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-6 py-4 text-sm text-slate-500">
+                                                {new Date(p.created_at).toLocaleString()}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-semibold text-slate-900">{p.user_name}</span>
+                                                    <span className="text-xs text-slate-500">{p.user_email}</span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm">
+                                                <span className="capitalize px-2 py-1 bg-slate-100 rounded text-slate-600 font-medium">{p.gateway}</span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm capitalize">
+                                                {p.plan === 'basic' ? 'Starter' : p.plan}
+                                            </td>
+                                            <td className="px-6 py-4 text-sm font-bold text-slate-900">
+                                                {p.currency} {p.amount}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full uppercase">
+                                                    {p.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 )}
 
