@@ -403,6 +403,24 @@ async def generate_gini_guide(user_id: str):
         skills = pm.profile.get("skills", [])
         experience = pm.profile.get("experience", [])
         
+        is_default_profile = (
+            identity.get("full_name", "") in ("", "Candidate", "User") and
+            identity.get("professional_title", "") in ("", "Professional") and
+            not skills and 
+            not experience
+        )
+
+        if is_default_profile:
+            return {
+                "status": "success",
+                "guide": {
+                    "summary": "Welcome to CareerGini! To receive hyper-personalized career guidance from Gini, please upload your resume or complete your profile.",
+                    "top_skills": [],
+                    "missing_skills": [],
+                    "target_role": "Upload Resume to Unlock Guidance"
+                }
+            }
+        
         exp_text = ""
         for i, exp in enumerate(experience[:3]):
             exp_text += f"- {exp.get('role', 'Professional')} at {exp.get('company', 'Company')} ({exp.get('duration', '')})\n"
