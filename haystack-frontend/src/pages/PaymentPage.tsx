@@ -24,7 +24,7 @@ const PLAN_CONFIG = {
     },
     premium: {
         name: 'Premium',
-        price: { USD: 25, EUR: 23, INR: 2099 },
+        price: { USD: 20, EUR: 18, INR: 1699 },
         builds: 20,
         color: 'from-purple-600 to-indigo-700',
         features: [
@@ -47,7 +47,9 @@ const CURRENCY_LABELS: Record<Currency, string> = { USD: 'USD — US Dollar', EU
 
 const PaymentPage: React.FC = () => {
     const [searchParams] = useSearchParams();
-    const planKey = (searchParams.get('plan') || 'starter') as 'starter' | 'premium';
+    const initialPlan = (searchParams.get('plan') || 'starter') as 'starter' | 'premium';
+    const [selectedPlan, setSelectedPlan] = React.useState<'starter' | 'premium'>(initialPlan);
+    const planKey = selectedPlan;
     const plan = PLAN_CONFIG[planKey] || PLAN_CONFIG.starter;
 
     const [currency, setCurrency] = useState<Currency>('USD');
@@ -212,9 +214,27 @@ const PaymentPage: React.FC = () => {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 px-4 py-10">
             <div className="max-w-5xl mx-auto">
                 {/* Back */}
-                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white mb-8 transition-colors text-sm font-medium">
+                <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white mb-6 transition-colors text-sm font-medium">
                     <ArrowLeft className="w-4 h-4" /> Back
                 </button>
+
+                {/* Plan Switcher */}
+                <div className="flex justify-center gap-3 mb-8">
+                    {(['starter', 'premium'] as const).map(pk => (
+                        <button
+                            key={pk}
+                            onClick={() => setSelectedPlan(pk)}
+                            className={`px-6 py-2.5 rounded-xl font-bold text-sm border-2 transition-all ${selectedPlan === pk
+                                    ? pk === 'premium'
+                                        ? 'border-purple-600 bg-purple-600 text-white shadow-md'
+                                        : 'border-blue-600 bg-blue-600 text-white shadow-md'
+                                    : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-blue-400'
+                                }`}
+                        >
+                            {PLAN_CONFIG[pk].name} — {CURRENCY_SYMBOLS['USD']}{PLAN_CONFIG[pk].price['USD']}
+                        </button>
+                    ))}
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     {/* Left: Plan Summary */}
@@ -269,8 +289,8 @@ const PaymentPage: React.FC = () => {
                                         key={c}
                                         onClick={() => setCurrency(c)}
                                         className={`py-2.5 px-3 rounded-xl border-2 text-sm font-bold transition-all ${currency === c
-                                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                                                : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-blue-300'
+                                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
+                                            : 'border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:border-blue-300'
                                             }`}
                                     >
                                         {CURRENCY_SYMBOLS[c]} {c}
@@ -288,8 +308,8 @@ const PaymentPage: React.FC = () => {
                                 <button
                                     onClick={() => setGateway('paypal')}
                                     className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${gateway === 'paypal'
-                                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                                            : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'
+                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'
                                         }`}
                                 >
                                     <div className="w-10 h-10 rounded-lg bg-[#003087] flex items-center justify-center text-white font-bold text-xs flex-shrink-0">PP</div>
@@ -304,8 +324,8 @@ const PaymentPage: React.FC = () => {
                                 <button
                                     onClick={() => { setGateway('razorpay'); setCurrency('INR'); }}
                                     className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${gateway === 'razorpay'
-                                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                                            : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'
+                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'
                                         }`}
                                 >
                                     <div className="w-10 h-10 rounded-lg bg-[#072654] flex items-center justify-center text-white font-bold text-xs flex-shrink-0">RZP</div>
@@ -320,8 +340,8 @@ const PaymentPage: React.FC = () => {
                                 <button
                                     onClick={() => setGateway('stripe')}
                                     className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${gateway === 'stripe'
-                                            ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                                            : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'
+                                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                        : 'border-gray-200 dark:border-gray-600 hover:border-blue-300'
                                         }`}
                                 >
                                     <div className="w-10 h-10 rounded-lg bg-[#635BFF] flex items-center justify-center text-white font-bold text-xs flex-shrink-0">

@@ -11,6 +11,8 @@ interface User {
     onboarding_completed: boolean;
     latest_resume_filename?: string;
     latest_resume_path?: string;
+    skills?: string[];
+    location?: string;
 }
 
 interface AuthContextType {

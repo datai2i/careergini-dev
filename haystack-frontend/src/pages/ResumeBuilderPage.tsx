@@ -961,7 +961,7 @@ export const ResumeBuilderPage: React.FC = () => {
                                         {/* Example JDs */}
                                         <div className="mt-2 text-right">
                                             <div className="flex flex-wrap justify-end gap-1.5">
-                                                {getDynamicRoles(persona).map((role, i) => (
+                                                {(getDynamicRoles(persona) as string[]).map((role: string, i: number) => (
                                                     <button
                                                         key={i}
                                                         onClick={() => setJobDescription(generateMockJD(role, persona))}
@@ -1345,7 +1345,11 @@ export const ResumeBuilderPage: React.FC = () => {
             </div>
 
             {(uploading || tailoring || generatingPDF) && (
-                <ProcessingOverlay isOpen={true} headline={persona?.professional_title} />
+                <ProcessingOverlay
+                    isOpen={true}
+                    headline={persona?.professional_title}
+                    skills={persona?.top_skills}
+                />
             )}
 
             <DraftResumeModal

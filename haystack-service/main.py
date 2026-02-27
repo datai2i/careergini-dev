@@ -752,8 +752,11 @@ async def generate_resume_pdf(request: ResumeTailorRequest):
 
         return response_data
         
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error generating PDF: {e}")
+        import traceback
+        logger.error(f"Error generating PDF: {e}\n{traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=str(e))
     text = request.get("text", "")
     if not text:

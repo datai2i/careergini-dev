@@ -32,8 +32,8 @@ export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, 
         features = ["5 AI-tailored resume builds", "Industry-specific tailoring (Tech, Finance, Healthcare & more)", "ATS score + 1-click regeneration", "Cover letter auto-generation", "Credits never expire"];
     } else if (isStarter && buildCount >= 5) {
         title = "Starter Build Limit Reached";
-        message = "You've used all 5 Starter builds. Upgrade to Premium and unlock Gini Chat mentorship, the global Job Search, Learning Hub, and 20 builds — all for a single $25 payment.";
-        ctaText = "Upgrade to Premium — $25 One-Time";
+        message = "You've used all 5 Starter builds. Upgrade to Premium and unlock Gini Chat mentorship, the global Job Search, Learning Hub, and 20 builds — all for a single $20 payment.";
+        ctaText = "Upgrade to Premium — $20 One-Time";
         nextPlan = 'premium';
         features = ["20 AI-tailored resume builds", "Unlimited Gini Chat AI mentor sessions", "Hyper-personalised global job search", "Learning Hub — skills, courses & career roadmap", "Credits never expire"];
     } else if (isPremium && buildCount >= 20) {
@@ -44,13 +44,61 @@ export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, 
         features = ["Instant credit reload", "Priority support", "Early access to Ultra Premium tools"];
     }
 
-    const handleCTA = () => {
+    const handleCTA = (planKey: string) => {
         onClose();
-        if (nextPlan === 'contact') {
+        if (planKey === 'contact') {
             window.location.href = 'mailto:team@datai2i.com?subject=Premium%20Quota%20Reload%20Request';
         } else {
-            navigate(`/payment?plan=${nextPlan}`);
+            navigate(`/payment?plan=${planKey}`);
         }
+    };
+
+    // For Free users, show buttons for both plans
+    const renderButtons = () => {
+        if (isFree && buildCount >= 1) {
+            return (
+                <div className="flex flex-col gap-3">
+                    <button
+                        onClick={() => handleCTA('premium')}
+                        className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-xl shadow-purple-500/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
+                    >
+                        <span>Upgrade to Premium — $20 One-Time</span>
+                        <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <button
+                        onClick={() => handleCTA('starter')}
+                        className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
+                    >
+                        <span>Upgrade to Starter — $5 One-Time</span>
+                        <ArrowRight className="w-5 h-5" />
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="w-full py-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm font-medium transition-colors mt-2"
+                    >
+                        Maybe Later
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex flex-col gap-3">
+                <button
+                    onClick={() => handleCTA(nextPlan)}
+                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/20 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
+                >
+                    <span>{ctaText}</span>
+                    <ArrowRight className="w-5 h-5" />
+                </button>
+                <button
+                    onClick={onClose}
+                    className="w-full py-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm font-medium transition-colors"
+                >
+                    Maybe Later
+                </button>
+            </div>
+        );
     };
 
     return (
@@ -97,21 +145,7 @@ export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, 
                         </div>
                     )}
 
-                    <div className="flex flex-col gap-3">
-                        <button
-                            onClick={handleCTA}
-                            className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
-                        >
-                            <span>{ctaText}</span>
-                            <ArrowRight className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="w-full py-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-sm font-medium transition-colors"
-                        >
-                            Maybe Later
-                        </button>
-                    </div>
+                    {renderButtons()}
                 </div>
             </div>
         </div>

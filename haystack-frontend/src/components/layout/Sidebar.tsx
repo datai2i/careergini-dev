@@ -39,7 +39,7 @@ export const Sidebar: React.FC = () => {
     ];
 
     const premiumItems = [
-        { id: 'chat', label: 'Gini Guide', icon: MessageSquare, path: '/gini-chat', accessKey: 'hasUnlimitedChat' },
+        { id: 'chat', label: 'Gini Chat', icon: MessageSquare, path: '/gini-chat', accessKey: 'hasUnlimitedChat' },
         { id: 'jobs', label: 'Job Search', icon: Briefcase, path: '/jobs', accessKey: 'hasJobSearch' },
         { id: 'learning', label: 'Learning Hub', icon: GraduationCap, path: '/learning', accessKey: 'hasLearningHub' },
     ];
@@ -116,7 +116,9 @@ export const Sidebar: React.FC = () => {
         <aside className="hidden md:flex flex-col w-72 bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border">
             <div className="p-6 pb-2 border-b border-gray-100 dark:border-dark-border/50">
                 <div className="flex items-center justify-center">
-                    <img src="/logo.png" alt="CareerGini Logo" className="h-14 md:h-16 w-auto mix-blend-multiply dark:mix-blend-normal drop-shadow-sm" />
+                    <button onClick={() => navigate('/home')} className="focus:outline-none" title="Go to Dashboard">
+                        <img src="/logo.png" alt="CareerGini Logo" className="h-14 md:h-16 w-auto mix-blend-multiply dark:mix-blend-normal drop-shadow-sm hover:opacity-80 transition-opacity" />
+                    </button>
                 </div>
             </div>
 

@@ -356,11 +356,11 @@ export const LoginPage: React.FC = () => {
                                 </div>
                                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Premium</h3>
                                 <div className="flex items-end gap-2 mt-3">
-                                    <span className="text-5xl font-extrabold text-purple-600">$25</span>
+                                    <span className="text-5xl font-extrabold text-purple-600">$20</span>
                                     <span className="text-gray-500 dark:text-gray-400 mb-2">one-time</span>
                                 </div>
                                 <div className="mt-3 px-3 py-1.5 bg-purple-50 dark:bg-purple-900/30 rounded-lg inline-flex items-center gap-2">
-                                    <span className="text-xs font-bold text-purple-700 dark:text-blue-300">20 builds · just $1.25 each</span>
+                                    <span className="text-xs font-bold text-purple-700 dark:text-blue-300">20 builds · just $1.00 each</span>
                                     <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-400 px-2 py-0.5 rounded-full">Gini Chat Unlocked</span>
                                 </div>
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">The complete career acceleration engine. Get Gini Chat mentorship that knows your full history, hyper-personalized global job search, and the Learning Hub to keep your skills ahead of the market — all for a single one-time payment.</p>
@@ -385,7 +385,7 @@ export const LoginPage: React.FC = () => {
                             </ul>
 
                             <button onClick={() => handleLogin('google')} className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5 transition-all duration-200">
-                                Unlock Full Power — $25 One-Time
+                                Unlock Full Power — $20 One-Time
                             </button>
                         </div>
 
@@ -423,7 +423,7 @@ export const LoginPage: React.FC = () => {
                         },
                         {
                             q: 'How much does each resume build actually cost?',
-                            a: 'Free: $0 for your very first full build. Starter ($5): 5 builds at $1.00 each. Premium ($25): 20 builds at $1.25 each, with your full Gini Chat mentor and global job search unlocked. After using your credits, top up at $1 per build — no plan required.'
+                            a: 'Free: $0 for your very first full build. Starter ($5): 5 builds at $1.00 each. Premium ($20): 20 builds at $1.00 each, with your full Gini Chat mentor and global job search unlocked. After using your credits, top up at $1 per build — no plan required.'
                         },
                         {
                             q: 'What makes the Industry-Specific Tailoring different from just adding keywords?',

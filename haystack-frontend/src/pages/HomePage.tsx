@@ -4,10 +4,10 @@ import { MessageSquare, FileText, Briefcase, GraduationCap, Sparkles, Zap, Chevr
 import { useAuth } from '../context/AuthContext';
 import { GiniGuide } from '../components/GiniGuide';
 
-const PLAN_META: Record<string, { label: string; maxBuilds: number; color: string; nextPlan: string | null; nextLabel: string | null; nextPrice: string | null }> = {
-    free: { label: 'Free', maxBuilds: 1, color: 'text-gray-600', nextPlan: 'starter', nextLabel: 'Starter', nextPrice: '$5' },
-    basic: { label: 'Starter', maxBuilds: 5, color: 'text-blue-600', nextPlan: 'premium', nextLabel: 'Premium', nextPrice: '$25' },
-    premium: { label: 'Premium', maxBuilds: 20, color: 'text-purple-600', nextPlan: null, nextLabel: null, nextPrice: null },
+const PLAN_META: Record<string, { label: string; maxBuilds: number; color: string; upgradePlans: { key: string; label: string; price: string }[] }> = {
+    free: { label: 'Free', maxBuilds: 1, color: 'text-gray-600', upgradePlans: [{ key: 'starter', label: 'Starter', price: '$5' }, { key: 'premium', label: 'Premium', price: '$20' }] },
+    basic: { label: 'Starter', maxBuilds: 5, color: 'text-blue-600', upgradePlans: [{ key: 'premium', label: 'Premium', price: '$20' }] },
+    premium: { label: 'Premium', maxBuilds: 20, color: 'text-purple-600', upgradePlans: [] },
 };
 
 const PLAN_FEATURES: Record<string, string[]> = {
@@ -99,8 +99,8 @@ export const HomePage: React.FC = () => {
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Current usage & available features</p>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold bg-opacity-10 ${plan === 'premium' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
-                                plan === 'basic' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
-                                    'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
+                            plan === 'basic' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                             }`}>
                             {plan === 'premium' ? <span className="flex items-center gap-1"><Star size={10} /> {meta.label}</span> :
                                 plan === 'basic' ? <span className="flex items-center gap-1"><Zap size={10} /> {meta.label}</span> :
@@ -117,8 +117,8 @@ export const HomePage: React.FC = () => {
                         <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                             <div
                                 className={`h-full rounded-full transition-all duration-700 ${buildCount >= maxBuilds ? 'bg-red-500' :
-                                        progressPct >= 80 ? 'bg-orange-500' :
-                                            plan === 'premium' ? 'bg-purple-600' : plan === 'basic' ? 'bg-blue-600' : 'bg-gray-500'
+                                    progressPct >= 80 ? 'bg-orange-500' :
+                                        plan === 'premium' ? 'bg-purple-600' : plan === 'basic' ? 'bg-blue-600' : 'bg-gray-500'
                                     }`}
                                 style={{ width: `${progressPct}%` }}
                             />
@@ -141,14 +141,22 @@ export const HomePage: React.FC = () => {
                     </div>
 
                     {/* Upgrade CTA or Contact */}
-                    {meta.nextPlan ? (
-                        <button
-                            onClick={() => navigate(`/payment?plan=${meta.nextPlan}`)}
-                            className="mt-auto w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-bold hover:-translate-y-0.5 hover:shadow-lg transition-all"
-                        >
-                            <span>Upgrade to {meta.nextLabel} — {meta.nextPrice} one-time</span>
-                            <ChevronRight size={16} />
-                        </button>
+                    {meta.upgradePlans.length > 0 ? (
+                        <div className="mt-auto flex flex-col gap-2">
+                            {meta.upgradePlans.map(up => (
+                                <button
+                                    key={up.key}
+                                    onClick={() => navigate(`/payment?plan=${up.key}`)}
+                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-white text-sm font-bold hover:-translate-y-0.5 hover:shadow-lg transition-all ${up.key === 'premium'
+                                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600'
+                                            : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                                        }`}
+                                >
+                                    <span>Upgrade to {up.label} — {up.price} one-time</span>
+                                    <ChevronRight size={16} />
+                                </button>
+                            ))}
+                        </div>
                     ) : (
                         <div className="mt-auto p-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 text-xs text-purple-700 dark:text-purple-300 font-medium text-center">
                             {buildCount >= maxBuilds
