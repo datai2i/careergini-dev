@@ -400,6 +400,26 @@ app.post('/admin/users/:id/update', verifyAdmin, async (req, res) => {
 });
 
 /**
+ * POST /admin/users/:id/reset-usage
+ * Archive existing resume generation logs to reset the user's build quota to 0.
+ */
+app.post('/admin/users/:id/reset-usage', verifyAdmin, async (req, res) => {
+    const userId = req.params.id;
+    try {
+        const query = `
+            UPDATE user_activity 
+            SET activity_type = 'resume_generated_archived'
+            WHERE user_id = $1 AND activity_type = 'resume_generated'
+        `;
+        const result = await db.query(query, [userId]);
+        res.json({ success: true, archived_count: result.rowCount });
+    } catch (err) {
+        console.error("Reset usage error:", err);
+        res.status(500).json({ error: 'Failed to reset usage' });
+    }
+});
+
+/**
  * GET /admin/logs/chats
  * Audit Gini Chat history
  */

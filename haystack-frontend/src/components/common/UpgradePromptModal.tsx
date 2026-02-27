@@ -32,9 +32,9 @@ export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, 
         features = ["20 AI-tailored resume builds", "Unlimited Gini Chat sessions", "Hyper-personalized Job Search", "Learning Hub access"];
     } else if (isPremium && buildCount >= 20) {
         title = "Power User Milestone!";
-        message = "You've utilized 20 builds. Recharge your credits or explore our upcoming Ultra Premium features.";
-        ctaText = "Reload Credits";
-        features = ["Add 20 more builds", "Priority support", "Early access to new tools"];
+        message = "You've utilized your 20 builds. Contact our team to reload your credits or ask about our upcoming Ultra Premium features.";
+        ctaText = "Contact Support to Reload";
+        features = ["Add more builds instantly", "Priority support", "Early access to new tools"];
     }
 
     return (
@@ -85,7 +85,11 @@ export const UpgradePromptModal: React.FC<UpgradePromptModalProps> = ({ isOpen, 
                         <button
                             onClick={() => {
                                 onClose();
-                                window.location.href = '/login#pricing'; // Quick way to pricing if logging out/redirecting
+                                if (currentPlan?.toLowerCase() === 'premium') {
+                                    window.location.href = 'mailto:team@datai2i.com?subject=Quota Reload Request';
+                                } else {
+                                    window.location.href = '/login#pricing';
+                                }
                             }}
                             className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-xl shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3"
                         >

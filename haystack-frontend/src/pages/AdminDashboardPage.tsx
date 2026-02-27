@@ -81,6 +81,26 @@ export const AdminDashboardPage: React.FC = () => {
         } catch (e) { console.error(e); }
     };
 
+    const resetUserUsage = async (userId: string) => {
+        if (!window.confirm("Are you sure you want to recharge this user's quota by archiving their past build history?")) return;
+        try {
+            const resp = await fetch(`/api/profile/admin/users/${userId}/reset-usage`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                }
+            });
+            if (resp.ok) {
+                showToast('User usage reset successfully', 'success');
+                fetchUsers();
+            } else {
+                showToast('Reset failed', 'error');
+            }
+        } catch (e) {
+            showToast('Reset error', 'error');
+        }
+    };
+
     const updateUser = async (userId: string, data: Partial<AdminUser>) => {
         try {
             const resp = await fetch(`/api/profile/admin/users/${userId}/update`, {
@@ -370,6 +390,15 @@ export const AdminDashboardPage: React.FC = () => {
                                                             >
                                                                 <Shield className="w-4 h-4 text-blue-600" />
                                                                 {u.role === 'admin' ? 'Revoke Admin' : 'Make Admin'}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    resetUserUsage(u.id);
+                                                                    setOpenActionId(null);
+                                                                }}
+                                                                className="w-full px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                                                            >
+                                                                <RefreshCw className="w-4 h-4 text-emerald-600" /> Reset Quota/Usage
                                                             </button>
                                                             <div className="h-px bg-slate-100 my-1"></div>
                                                             <button
